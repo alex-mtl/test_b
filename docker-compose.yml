@@ -1,0 +1,40 @@
+
+version: "3"
+
+services:
+  web:
+    image: nginx:alpine
+    ports:
+      - 8082:80
+    volumes:
+      - ./public_html:/public_html
+      - ./docker.files/nginx/conf.d:/etc/nginx/conf.d
+    networks:
+      - bcatest
+
+  php:
+    ## image: php:7.4.3-fpm-alpine
+    build:
+      context: ./docker.files/php
+      dockerfile: Dockerfile
+    volumes:
+      - ./public_html:/public_html
+    expose:
+      - 9000
+    networks:
+      - bcatest
+  database:
+    image: mysql:5.7
+    ports:
+      - "33062:3306"
+    command: --init-file /data/application/init.sql
+    volumes:
+      - ./docker.files/mysql/init.sql:/data/application/init.sql
+    environment:
+      MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: bcatest
+    networks:
+      - bcatest
+networks:
+  bcatest:
